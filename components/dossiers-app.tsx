@@ -25,6 +25,7 @@ const PRIORITE_RANK: Record<Priorite, number> = { urgente: 0, normale: 1, faible
 
 type Stats = { aTraiter: number; enCours: number; enAttente: number; termine: number; enRetard: number }
 
+/** Orchestre l'affichage, les filtres et les dialogues de gestion des dossiers. */
 export function DossiersApp({ dossiers, stats }: { dossiers: Dossier[]; stats: Stats }) {
   const router = useRouter()
   const [search, setSearch] = React.useState("")
@@ -90,11 +91,19 @@ export function DossiersApp({ dossiers, stats }: { dossiers: Dossier[]; stats: S
       <StatsCards stats={stats} />
       <DossiersToolbar search={search} onSearchChange={setSearch} etatFilter={etatFilter} onEtatFilterChange={setEtatFilter} prioriteFilter={prioriteFilter} onPrioriteFilterChange={setPrioriteFilter} overdueOnly={overdueOnly} onOverdueOnlyChange={setOverdueOnly} sort={sort} onSortChange={setSort} onNew={() => setCreateOpen(true)} onImport={() => setImportOpen(true)} onExport={handleExport} />
       <DossiersTable dossiers={filtered} hasFilters={hasFilters} onView={setViewing} onEdit={setEditing} onDelete={setDeleting} onMarkDone={handleMarkDone} />
-      <DossierFormDialog open={createOpen} onOpenChange={setCreateOpen} dossier={null} />
-      <DossierFormDialog open={Boolean(editing)} onOpenChange={(open) => !open && setEditing(null)} dossier={editing} />
+      {createOpen && (
+        <DossierFormDialog open onOpenChange={setCreateOpen} dossier={null} />
+      )}
+      {editing && (
+        <DossierFormDialog
+          open
+          onOpenChange={(open) => !open && setEditing(null)}
+          dossier={editing}
+        />
+      )}
       <DossierDetailDialog dossier={viewing} onOpenChange={(open) => !open && setViewing(null)} onEdit={(d) => { setViewing(null); setEditing(d) }} />
       <DeleteDossierDialog dossier={deleting} onOpenChange={() => setDeleting(null)} />
-      <CsvImportDialog open={importOpen} onOpenChange={setImportOpen} />
+      {importOpen && <CsvImportDialog open onOpenChange={setImportOpen} />}
     </div>
   )
 }
