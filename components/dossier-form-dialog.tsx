@@ -49,11 +49,18 @@ import {
 import type { Dossier } from "@/lib/db/schema"
 import { cn } from "@/lib/utils"
 
+/**
+ * Bannière pédagogique : ce dialogue transforme les saisies utilisateur en un
+ * contrat DossierInput validé par les actions serveur avant toute écriture en base.
+ */
+
+/** Convertit une date JavaScript en date ISO attendue par PostgreSQL. */
 function toIsoDate(date: Date | undefined): string {
   if (!date) return ""
   return format(date, "yyyy-MM-dd")
 }
 
+/** Convertit une date ISO persistée en date utilisable par le calendrier. */
 function fromIsoDate(value: string | null | undefined): Date | undefined {
   if (!value) return undefined
   const d = new Date(value)
@@ -71,6 +78,7 @@ type FormState = {
   commentaire: string
 }
 
+/** Produit les valeurs initiales d'un nouveau dossier. */
 function emptyState(): FormState {
   return {
     numero: "",
@@ -84,6 +92,7 @@ function emptyState(): FormState {
   }
 }
 
+/** Produit les valeurs de formulaire correspondant à un dossier existant. */
 function fromDossier(d: Dossier): FormState {
   return {
     numero: d.numero,
@@ -97,6 +106,7 @@ function fromDossier(d: Dossier): FormState {
   }
 }
 
+/** Affiche un formulaire isolé pour créer ou modifier un dossier. */
 export function DossierFormDialog({
   open,
   onOpenChange,
@@ -109,17 +119,13 @@ export function DossierFormDialog({
   const router = useRouter()
   const [pending, setPending] = React.useState(false)
   const [errors, setErrors] = React.useState<string[]>([])
-  const [form, setForm] = React.useState<FormState>(emptyState())
+  const [form, setForm] = React.useState<FormState>(() =>
+    dossier ? fromDossier(dossier) : emptyState()
+  )
 
   const isEdit = Boolean(dossier)
 
-  React.useEffect(() => {
-    if (open) {
-      setForm(dossier ? fromDossier(dossier) : emptyState())
-      setErrors([])
-    }
-  }, [open, dossier])
-
+  /** Valide et persiste la création ou la modification demandée. */
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setPending(true)
