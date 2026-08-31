@@ -17,12 +17,18 @@ import {
 import { Empty, EmptyDescription, EmptyMedia, EmptyTitle } from "@/components/ui/empty"
 import { importDossiersCsv } from "@/app/actions/dossiers"
 
+/**
+ * Bannière pédagogique : ce dialogue lit un fichier CSV choisi par l'utilisateur,
+ * transmet son texte à l'action serveur et présente les succès et erreurs par ligne.
+ */
+
 type ImportResult = {
   insertedCount: number
   totalRows: number
   errors: { line: number; message: string }[]
 }
 
+/** Affiche l'import CSV et son compte rendu détaillé. */
 export function CsvImportDialog({
   open,
   onOpenChange,
@@ -36,14 +42,7 @@ export function CsvImportDialog({
   const [fileName, setFileName] = React.useState<string | null>(null)
   const [result, setResult] = React.useState<ImportResult | null>(null)
 
-  React.useEffect(() => {
-    if (open) {
-      setFileName(null)
-      setResult(null)
-      if (fileInputRef.current) fileInputRef.current.value = ""
-    }
-  }, [open])
-
+  /** Lit et importe le fichier sélectionné sans interrompre les lignes valides. */
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
